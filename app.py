@@ -44,7 +44,7 @@ mysql.init_app(app)
 
 UPLOAD_FOLDER = 'uploads/'
 TEMP_FOLDER = 'temp/'
-ALLOWED_EXTENSIONS = set(['mp3','wav','m4a'])
+ALLOWED_EXTENSIONS = set(['mp3','wav','m4a','png','jpeg','jpg'])
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['TEMP_FOLDER'] = TEMP_FOLDER
 
@@ -61,9 +61,13 @@ with open("dejavu.cnf.SAMPLE") as f:
 def upload_file():
     if request.method == 'POST':
         file = request.files['file']
-        adcontent = request.form['adcontent']
+        brand = request.form['brand']
+        offertitle = request.form['offertitle']
+        offercontent = request.form['offercontent']
+        image = request.files['offerimage']
+        offerlink = request.form['offerlink']
 
-        if file and allowed_file(file.filename):
+        if file and allowed_file(file.filename) and image and allowed_file(image.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
@@ -71,6 +75,10 @@ def upload_file():
             #os.rename(UPLOAD_FOLDER + filename, UPLOAD_FOLDER+'niloofar.jpg')
             FILEPATH = UPLOAD_FOLDER + filename
             
+            imagename = secure_filename(image.filename)
+            image.save(os.path.join(app.config['UPLOAD_FOLDER']+"images/", imagename))
+
+            imagepath = UPLOAD_FOLDER + "images/" + imagename
 
             #Initializing Dejavu object with config
             djv = Dejavu(config)
@@ -82,7 +90,7 @@ def upload_file():
             # Create db connection to add data
             db = mysql.connect()
             cursor = db.cursor()
-            cursor.execute("INSERT INTO adcontent (sid, content) VALUES (%s,%s)", (sid, adcontent))
+            cursor.execute("INSERT INTO adcontent (sid, brand, offertitle, offercontent, imagepath, offerlink) VALUES (%s,%s,%s,%s,%s,%s)", (sid, brand, offertitle, offercontent, imagepath, offerlink))
             db.commit()
             db.close()
 
@@ -103,7 +111,7 @@ def getAdContent(sid):
     adcontent = c.execute("SELECT * FROM adcontent WHERE sid=%s", (sid))
     adcontent = c.fetchone()
     
-    return adcontent[2]
+    return adcontent
 
 
 @app.route('/match/', methods=['GET', 'POST'])
@@ -134,7 +142,11 @@ def match_file():
                 "song_name": matched_track['song_name'],
                 "match_time": matched_track['match_time'],
                 "confidence": matched_track['confidence'],
-                "adcontent": adcontent
+                "brand": adcontent[3],
+                "offertitle": adcontent[2],
+                "offercontent": adcontent[4],
+                "offerimage": adcontent[5],
+                "offerlink": adcontent[6],
                 }    
             
             #Delete temporary sample clip
