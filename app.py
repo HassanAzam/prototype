@@ -44,7 +44,7 @@ mysql.init_app(app)
 
 UPLOAD_FOLDER = 'uploads/'
 TEMP_FOLDER = 'temp/'
-ALLOWED_EXTENSIONS = set(['mp3'])
+ALLOWED_EXTENSIONS = set(['mp3','wav','m4a'])
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['TEMP_FOLDER'] = TEMP_FOLDER
 
@@ -106,7 +106,7 @@ def getAdContent(sid):
     return adcontent[2]
 
 
-@app.route('/match', methods=['GET', 'POST'])
+@app.route('/match/', methods=['GET', 'POST'])
 def match_file():
     
     if request.method == 'POST':
@@ -133,6 +133,7 @@ def match_file():
                 "song_id": matched_track['song_id'],
                 "song_name": matched_track['song_name'],
                 "match_time": matched_track['match_time'],
+                "confidence": matched_track['confidence'],
                 "adcontent": adcontent
                 }    
             
