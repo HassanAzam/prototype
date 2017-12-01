@@ -114,7 +114,7 @@ def getAdContent(sid):
     return adcontent
 
 
-@app.route('/match/', methods=['GET', 'POST'])
+@app.route('/match', methods=['GET', 'POST'])
 def match_file():
     
     if request.method == 'POST':
@@ -147,8 +147,10 @@ def match_file():
                 "offercontent": adcontent[4],
                 "offerimage": adcontent[5],
                 "offerlink": adcontent[6],
+                "offerid": adcontent[0]
                 }    
             
+            print(jsonify(response))
             #Delete temporary sample clip
             os.remove(FILEPATH)
 
